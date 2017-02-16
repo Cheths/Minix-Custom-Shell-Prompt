@@ -1,6 +1,6 @@
 CXX := clang
 CXXFLAGS := -g -w -fPIC -Wall
-INCLUDES := -I
+INCLUDES := -I.
 
 OBJECTS := main.o myfunctions.o
 

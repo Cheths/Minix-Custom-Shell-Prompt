@@ -1,3 +1,4 @@
+
 #include "common.h"
 
 void ctrlC_Handler() {
@@ -15,16 +16,16 @@ char* duplicate(char *command){
     int len;
     char *hs;
 
-    if(command==NULL)
+    if(command == NULL)
     {
         return NULL;
     }
 
-    len=strlen(command);
-    hs=(char*)malloc(len*sizeof(char));
+    len=strlen(command)+1;//+1 for the null character
+    hs=(char *)malloc(len*sizeof(char));
 
     if (hs == NULL) {
-        log_err("Malloc failed");
+       // log_err("Malloc failed");
         return NULL;
     } else {
         strcpy(hs,command);
@@ -47,7 +48,7 @@ char* readProfile(char *type){
 				
 			while(fgets(command, sizeof(command),fp) != NULL){
 			
-				temp = strtok("=");//Get key
+				temp = strtok(command,"=");//Get key
 				
 				if(strchr(temp,'#')){//Skip commented lines
 					continue;
@@ -60,7 +61,7 @@ char* readProfile(char *type){
 						return NULL;
 					}
 					len=strlen(promptsign);
-					pos = promptsign + len;
+					pos = promptsign + len - 1;
 					*pos = '\0';
 				} else if(!strcmp(temp,"path")){
 					char *path;
@@ -75,7 +76,7 @@ char* readProfile(char *type){
 						return NULL;
 					}
 					len = strlen(home);
-					pos = home+len;
+					pos = home + len - 1;
 					*pos = '\0';
 				}
 				
@@ -84,7 +85,7 @@ char* readProfile(char *type){
 				if(!strcmp(type, "home")){
 					return home;
 				} else if(!strcmp(type, "prompt")){
-					return prompt;
+					return promptsign;
 				} else {
 					return NULL;
 				}

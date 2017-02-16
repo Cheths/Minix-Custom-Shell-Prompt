@@ -4,7 +4,7 @@
 
 int main(){
 	
-	//signal(SIGINT, ctrlC_Handler);
+	signal(SIGINT, ctrlC_Handler);
 	
 	char *home;
     char *promptsign;

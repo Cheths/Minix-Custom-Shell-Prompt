@@ -17,6 +17,6 @@
 #define PROFILE "Shell_Profile"
 #define SIZE 1024
 
-char* readProfile(char *type);
 void ctrlC_Handler();
 char* duplicate(char *command);
+char* readProfile(char *type);
