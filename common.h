@@ -14,6 +14,8 @@
 
 #include <malloc.h>
 
+#define log_info(M, ...) fprintf(stderr,M "\n",##__VA_ARGS__)
+
 #define PROFILE "Shell_Profile"
 #define SIZE 1024
 

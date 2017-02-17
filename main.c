@@ -11,6 +11,8 @@ int main(){
 	char buf[SIZE];
 	
 	do{
+		//log_info("Function:%s:  Entry", __FUNCTION__);
+
 		if(readProfile("prompt") == NULL){
 			promptsign = "$";
             home = getcwd(NULL,0);
@@ -23,7 +25,7 @@ int main(){
 		while(1){
 			char cwd[255];
 			getcwd(cwd,sizeof(cwd));
-			printf("%s%s",cwd,promptsign);
+			printf("%s$:",cwd);
 			
 			if(!fgets(buf,100,stdin)){
 				return 0;
@@ -31,5 +33,6 @@ int main(){
 		}
 	}while(0);
 	
+	//log_info("Function:%s Exit", __FUNCTION__);
 	return 0;
 }
