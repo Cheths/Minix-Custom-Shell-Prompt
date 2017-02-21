@@ -41,6 +41,7 @@ int valid_oldpwd;
 char oldpwd[255];
 
 void ctrlC_Handler();
+void alarm_Handler();
 char* duplicate(char *command);
 char* readProfile(char *type);
 void signalhandler(int signo);

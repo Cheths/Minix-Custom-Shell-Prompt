@@ -4,7 +4,7 @@
 
 int main(){
 	
-	//signal(SIGINT, ctrlC_Handler);
+	signal(SIGALRM, alarm_Handler);
 	
 	char *home;
     char *promptsign;
@@ -22,6 +22,7 @@ int main(){
 			promptsign = readProfile("prompt");
 			home = readProfile("home");
 		}
+
 		new_act.sa_handler = SIG_IGN;
 		retval = sigaction(SIGINT, &new_act, &old_act);
 		if(retval < 0){
@@ -63,7 +64,9 @@ int main(){
 					retval = Execute(normal);
 				}
 			}
+
 		}
+
 	}while(0);
 	
 	//log_info("Function:%s Exit", __FUNCTION__);

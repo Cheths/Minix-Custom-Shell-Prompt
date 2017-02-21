@@ -9,7 +9,24 @@ void ctrlC_Handler() {
 	{
 		if (choice == 'Y' || choice == 'y') {
 			log_info("successful exit");
-			exit(1);
+			exit(0);
+		}
+	}
+}
+
+void alarm_Handler() {
+	char choice;
+	printf("\nDo you want to exit? Enter y/n \n");
+	scanf("%c", &choice);
+	log_info("Cmd entered:%c",choice);
+	{
+		if (choice == 'Y' || choice == 'y') {
+			log_info("successful exit");
+			exit(0);
+		}
+		else
+		{
+			longjmp(sjbuf,1);
 		}
 	}
 }
@@ -17,8 +34,8 @@ void ctrlC_Handler() {
 void signalhandler(int signo)
 {
     switch(signo)
-    {
-        case SIGINT:
+    {   
+		case SIGINT:
         {
             char str;
             printf("\nAre you sure?[Y/N]");
@@ -331,8 +348,11 @@ int Execute(char *buf)
                         waitpid( pid, &status, 0 );
                     }
                 }
+                alarm(5);
             }
         }
+        
+        
     }while(0);
 
     return retval;
