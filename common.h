@@ -47,3 +47,4 @@ char* readProfile(char *type);
 void signalhandler(int signo);
 void initializeCommandArray(COMMAND_ARRAY *cArray);
 int Execute(char *buf);
+int alarmEnabled;

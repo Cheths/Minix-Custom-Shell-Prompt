@@ -42,8 +42,8 @@ void signalhandler(int signo)
             str = getchar();
             if(str=='y' || str=='Y')
                 exit(0);
-            else
-                longjmp(sjbuf,1);
+			else
+			   longjmp(sjbuf,1);
             break;
         }
         case SIGCHLD:
@@ -126,7 +126,14 @@ char* readProfile(char *type)
                 len=strlen(home);
                 pos=home+len-1;
                 *pos='\0';
-            }
+            } else if(!strcmp(temp,"alarmEnabled")){
+				temp1=strtok(NULL,"=");
+				if(!strcmp(temp1,"true")){
+					alarmEnabled = 1;
+				}else{
+					alarmEnabled = 0;
+				}
+			}
         }
 
         fclose(fp);
@@ -348,7 +355,9 @@ int Execute(char *buf)
                         waitpid( pid, &status, 0 );
                     }
                 }
-                alarm(5);
+				if(alarmEnabled){
+					alarm(5);
+				}
             }
         }
         
