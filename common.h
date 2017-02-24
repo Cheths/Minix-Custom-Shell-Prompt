@@ -46,4 +46,5 @@ char* duplicate(char *command);
 char* readProfile(char *type);
 void signalhandler(int signo);
 void initializeCommandArray(COMMAND_ARRAY *cArray);
+int parseToken(char *buf,COMMAND_ARRAY *cArray, int clear);
 int Execute(char *buf);

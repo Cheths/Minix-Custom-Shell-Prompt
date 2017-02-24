@@ -1,4 +1,3 @@
-
 #include "common.h"
 
 void ctrlC_Handler() {
@@ -34,8 +33,8 @@ void alarm_Handler() {
 void signalhandler(int signo)
 {
     switch(signo)
-    {   
-		case SIGINT:
+    {
+        case SIGINT:
         {
             char str;
             printf("\nAre you sure?[Y/N]");
@@ -233,105 +232,7 @@ int Execute(char *buf)
                     exit(0);
                 }
 
-                while(arg_list[counter2] != NULL)
-                {
-                    if(strchr(arg_list[counter2],'|'))
-                        debug("Pipe command entered");
-					
-                    if( !strcmp( arg_list[counter2], "|"))
-                    {
-                        int num_pcmds = 0;
-                        int tmp = 0;
-                        while (arg_list[tmp] != NULL) {
-                            debug("arg_list[%d]: %s", tmp, arg_list[tmp]);
-                            if (!strcmp( arg_list[tmp], "|")) {
-                                num_pcmds++;
-                            }
-                            tmp++;
-                        } 
-                       
-                        {
-                            int fds[num_pcmds][2];
-                            int arg[num_pcmds + 1][2];
-                            int cmd = 1; /* atleast 1 command */
-                            pid_t pids[num_pcmds + 1];
 
-                            tmp = 0;
-                            arg[cmd - 1][0] = 0;
-
-                            /* Mark when each command is starting and ending */
-                            while (arg_list[tmp] != NULL) {
-                                if (!strcmp( arg_list[tmp], "|")) {
-                                    arg[cmd - 1][1] = tmp;
-                                    pipe(&fds[cmd - 1][0]);
-                                    debug("cmd %d.. fds[%d][0] %d fds[%d][1] %d", 
-                                           cmd -1, cmd -1, fds[cmd - 1][0],
-                                           cmd -1, fds[cmd - 1][1]);
-                                    cmd++;
-                                    if (cmd <= num_pcmds + 1) {
-                                        arg[cmd - 1][0] = tmp + 1;
-                                    }
-                                }
-                                tmp++;
-                            }
-                            arg[cmd -1][1] = tmp;
-
-                            for (tmp = 0; tmp <= num_pcmds; tmp++) {
-                                debug("num_pcmds %d: arg[%d][0].. %d; arg[%d][1].. %d", 
-                                       num_pcmds, tmp, arg[tmp][0], tmp, arg[tmp][1]);
-                            }
-
-                            for (tmp = 0; tmp <= num_pcmds; tmp++) {
-
-                                int k;
-                                pids[tmp] = fork();
-    
-                                if (pids[tmp] == 0) { // child
-
-                                    if (tmp == 0) {
-                                        dup2(fds[tmp][PIPE_WRITE], STDOUT_FILENO);
-                                    } else if (tmp == num_pcmds) {
-                                        dup2(fds[tmp - 1][PIPE_READ], STDIN_FILENO );
-                                    } else {
-                                        dup2(fds[tmp - 1][PIPE_READ], STDIN_FILENO );
-                                        dup2(fds[tmp][PIPE_WRITE], STDOUT_FILENO);
-                                    }
-
-                                    arg_list[arg[tmp][1]] = 0;
-
-                                    for (k = 0; k < num_pcmds; k++) {
-                                        debug("k %d: 0 %d, 1 %d", k, fds[k][0],
-                                                fds[k][1]);
-                                        close(fds[k][0]);
-                                        close(fds[k][1]);
-                                    }
-
-                                    for (k = arg[tmp][0]; k <= arg[tmp][1]; k++)
-                                    {
-                                        debug("tmp %d: arg_list[%d] %s", tmp, k,
-                                                arg_list[k]);
-                                    }
-
-                                    /* execute the command */
-                                    execvp(arg_list[arg[tmp][0]], &arg_list[arg[tmp][0]]);
-                                    exit(0);
-                                }
-                            }
-                            for (tmp = 0; tmp < num_pcmds; tmp++) {
-                                close(fds[tmp][0]);
-                                close(fds[tmp][1]);
-                            }
-                            for (tmp = 0; tmp <= num_pcmds; tmp++) {
-                                waitpid(pids[tmp], NULL, 0);
-                            }
-                        } 
-                        /* All is done */
-                        isrun=1;
-                        break;
-                    }
-                    counter2++;
-                }
-                
                 /* Handle normal command.. No pipe */
                 if (arg_list[0] !=NULL && isrun==0)
                 {
@@ -355,5 +256,62 @@ int Execute(char *buf)
         
     }while(0);
 
+    return retval;
+}
+
+int parseToken(char *buf,COMMAND_ARRAY *cArray, int clear)
+{
+    int retval=1;
+    int length=0;
+    int index=0,count=0;
+    static int slevel=0;
+    static int array_count;
+
+    if(clear)
+    {
+        slevel = 0;
+        array_count = 0;
+    }
+
+    if(buf==NULL)
+    {
+        return 0;
+    }
+
+    do
+    {
+        length = strlen(buf);
+        debug("length is %d",length);
+
+        while(length)
+        {
+            char *c =  (char *)&buf[index];
+
+            /* raise our level if/when '(' is encountered in input */
+            if(*c=='(')
+            {
+                ++slevel;
+            }
+
+            /* lower our level if/when '(' is encountered in input */
+            if(*c==')')
+            {
+                --slevel;
+            }
+
+            if(isalpha(buf[index]) || isspace(buf[index]) || (*c=='-'))
+            {
+                cArray[array_count].level = slevel;
+                cArray[array_count].input[count] =  buf[index];
+                count++;
+            }
+            index++;
+            length--;
+        }
+        cArray[array_count].input[count] = '\0';
+        array_count++;
+    }while(0);
+
+    debug("EXIT");
     return retval;
 }
