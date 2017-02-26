@@ -39,6 +39,7 @@ jmp_buf sjbuf;
 COMMAND_ARRAY cArray[CARRAY_SIZE];
 int valid_oldpwd;
 char oldpwd[255];
+int alarmEnabled;
 
 void ctrlC_Handler();
 void alarm_Handler();
@@ -47,5 +48,6 @@ char* readProfile(char *type);
 void signalhandler(int signo);
 void initializeCommandArray(COMMAND_ARRAY *cArray);
 int parseToken(char *buf,COMMAND_ARRAY *cArray, int clear);
-int Execute(char *buf);
-int alarmEnabled;
+int Execute(char *buf, char *delimiter);
+void handleBraceAndReturnString(int retval, char* finalString[1024], char* temp);
+int IsValidExpression(char *input);
