@@ -63,7 +63,6 @@ void signalhandler(int signo) {
 char* duplicate(char *command) {
 	int len;
 	char *hs;
-	//log_info("Inside duplicate::%s",command);
 	if (command == NULL) {
 		return NULL;
 	}
@@ -76,7 +75,6 @@ char* duplicate(char *command) {
 		return NULL;
 	} else {
 		strcpy(hs, command);
-		//log_info("Exiting duplicate::%s",command);
 		return hs;
 	}
 }
@@ -170,10 +168,7 @@ void handleBraceAndReturnString(int retval, char* finalString[1024], char* temp)
 		if (token != NULL)
 			retval = parseToken(token, cArray, 0);
 	}
-	/*
-	 * execute the command based on their level, as rightmost input in
-	 * '()' has higher priority.
-	 */
+	
 	retval = 0;
 	while (cArray[finalcount].level != -1) {
 		strcat(finalString, cArray[finalcount].input);
@@ -196,7 +191,7 @@ int Execute(char *buf, char *delimiter) {
 			char first_argument[64] = { 0 };
 
 			if (strchr(buf, '<') || strchr(buf, '>')) {
-				printf("Command with &,< and > is not supported\n");
+				printf("Command with < and > is not supported\n");
 				break;
 			}
 
@@ -205,33 +200,29 @@ int Execute(char *buf, char *delimiter) {
 			} else {
 				arg_list[counter] = strtok(buf, delimiter);
 			}
-
 			if (arg_list[counter] != NULL) {
 				strcpy(first_argument, arg_list[0]);
 				while (arg_list[counter] != NULL) {
 					counter++;
 					char *prevCommand = arg_list[counter - 1];
 					if (startsWith("(", prevCommand)) {
+						
 						arg_list[counter - 1] = '\0';
 						char stringBraces[1024];
 						memset(stringBraces, 0, 1024);
 						handleBraceAndReturnString(retval, &stringBraces, prevCommand);
 						preProcessCommand(stringBraces);
 
-					} else if(strchr(prevCommand, '&')){
+					} else if(strchr(prevCommand, '&')){						
 						strtok(prevCommand, "&");
 						arg_list[counter] = strtok(NULL, "&");
 					}else if(strchr(prevCommand, ';')){
-						//int locIndex = counter - 1;
-						strtok(prevCommand, ";");
+						strtok(prevCommand, ";");						
 						arg_list[counter] = strtok(NULL, ";");
-						/*char *temp = strtok(prevCommand, ";");
-						while(temp != NULL){
-							arg_list[locIndex] = temp;
-						}*/
+						
 					}else {
 						if (delimiter != NULL) {
-							arg_list[counter] = strtok(NULL, "h");
+							arg_list[counter] = strtok(NULL, '\0');
 						}
 					}
 				}
@@ -285,7 +276,6 @@ int Execute(char *buf, char *delimiter) {
 
 				// Handle normal command
 				if (arg_list[0] != NULL && isrun == 0) {
-					debug("first_argument %s", first_argument);
 					//pid = fork();
 					counter = 0;
 
@@ -314,14 +304,9 @@ int Execute(char *buf, char *delimiter) {
 							return 1;
 							log_info("Error forking the process, PID: %d", pid);
 						} else if (pid == 0) {
-							//log_info("Inside execv loop: PID: %d", pid);
-							log_info("Arg is %s", arg_list[counter]);
-							//log_info("Before Child exit..");
 							execvp(arg_list[counter], arg_ind);
 							exit(0);
 						} else {
-							//log_info("Inside waitpid loop: PID: %d", pid);
-							log_info("Arg is %s", arg_list[counter]);
 							waitpid(pid, &status, 0);
 						}
 						counter++;
@@ -340,17 +325,28 @@ int Execute(char *buf, char *delimiter) {
 
 int preProcessCommand(char *buf) {
 	char *delimiter;
-
-	int ampersandCharLength = getIndex(buf,'&');
-	int semicolonCharLength = getIndex(buf,';');
-
-	if (ampersandCharLength > semicolonCharLength) {
-		delimiter = "&";
-	} else if(ampersandCharLength < semicolonCharLength){
-		delimiter = ";";
-	}
+	int length = 0;
+	int index = 0;
+	int *temp = buf;
+	length = strlen(buf);
+	while (length) {
+			char *c = (char *) &temp[index];
+			if(*c == '&')
+			{
+				delimiter = '&';
+				break;
+			}
+			else if(*c == ';')
+			{
+				delimiter = ';';
+				break;
+			}			
+			index++;
+			length--;
+		}
 	return Execute(buf, delimiter);
 }
+
 
 int getIndex(char *str, char *delim)
 {
@@ -379,7 +375,6 @@ int parseToken(char *buf, COMMAND_ARRAY *cArray, int clear) {
 
 	do {
 		length = strlen(buf);
-		debug("length is %d",length);
 
 		while (length) {
 			char *c = (char *) &buf[index];
