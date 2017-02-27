@@ -1,3 +1,6 @@
+/**
+ * This file contains all the header files for the program.
+ */
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>

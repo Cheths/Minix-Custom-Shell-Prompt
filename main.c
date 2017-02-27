@@ -1,7 +1,13 @@
+/**
+ * To Build a Custom shell prompt.
+ * This file contains the main function for the program.
+ */
 #define _POSIX_SOURCE
 
 #include "common.h"
-
+/*
+ * main() function to display Custom Shell Prompt and process user inputs in the prompt.
+ */
 int main(){
 
 	signal(SIGALRM, alarm_Handler);

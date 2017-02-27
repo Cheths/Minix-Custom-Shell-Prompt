@@ -4,6 +4,9 @@
  */
 #include "common.h"
 
+/*
+ * Function to check whether source string starts with a particular character.
+ */
 bool startsWith(const char *pre, const char *str)
 {
     size_t lenpre = strlen(pre),
@@ -11,6 +14,9 @@ bool startsWith(const char *pre, const char *str)
     return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
 }
 
+/*
+ * Function to handle 'Ctrl+C' keystroke.
+ */
 void ctrlC_Handler() {
 	char choice;
 	printf("\nDo you want to exit? Enter y/n \n");
@@ -24,6 +30,9 @@ void ctrlC_Handler() {
 	}
 }
 
+/*
+ * Function to show the alarm after 5 seconds of user command input.
+ */
 void alarm_Handler() {
 	char choice;
 	printf("\nDo you want to exit? Enter y/n \n");
@@ -39,6 +48,9 @@ void alarm_Handler() {
 	}
 }
 
+/*
+ * Function to handle signal interrupts.
+ */
 void signalhandler(int signo) {
 	switch (signo) {
 	case SIGINT: {
@@ -60,6 +72,9 @@ void signalhandler(int signo) {
 	}
 }
 
+/*
+ * Function to get a clone of the input command.
+ */
 char* duplicate(char *command) {
 	int len;
 	char *hs;
@@ -79,6 +94,9 @@ char* duplicate(char *command) {
 	}
 }
 
+/*
+ * Function to read profile from the "Shell_Profile" config file.
+ */
 char* readProfile(char *type) {
 	FILE *fp;
 	char *home, *promptsign, *temp, *temp1, *pos;
@@ -144,6 +162,9 @@ char* readProfile(char *type) {
 	} while (0);
 }
 
+/*
+ * Function to initialize command array.
+ */
 void initializeCommandArray(COMMAND_ARRAY *cArray) {
 	int i = 0;
 
@@ -157,6 +178,9 @@ void initializeCommandArray(COMMAND_ARRAY *cArray) {
 	}
 }
 
+/*
+ * Function to handle braces and return the modified string.
+ */
 void handleBraceAndReturnString(int retval, char* finalString[1024], char* temp) {
 	int finalcount = 0;
 	char *token;
@@ -176,6 +200,9 @@ void handleBraceAndReturnString(int retval, char* finalString[1024], char* temp)
 	};
 }
 
+/*
+ * Function that processes command execution logic.
+ */
 int Execute(char *buf, char *delimiter) {
 
 	char *arg_list[30] = { 0 };
@@ -283,7 +310,7 @@ int Execute(char *buf, char *delimiter) {
 						if(strchr(arg_list[counter],'&') || strchr(arg_list[counter],';')){
 							continue;
 						}
-						char *arg_ind[30] = { 0 };//reintialize to avoid previous option retained for current command.
+						char *arg_ind[30] = { 0 };//reinitialize to avoid previous option retained for current command.
 						debug("%s***",arg_list[counter]);
 						arg_ind[0] = arg_list[counter];
 						char *opt[30] = { 0 };
@@ -323,6 +350,9 @@ int Execute(char *buf, char *delimiter) {
 	return retval;
 }
 
+/*
+ * Function to pre-process input commands checking for delimiters.
+ */
 int preProcessCommand(char *buf) {
 	char *delimiter;
 	int length = 0;
@@ -330,24 +360,23 @@ int preProcessCommand(char *buf) {
 	int *temp = buf;
 	length = strlen(buf);
 	while (length) {
-			char *c = (char *) &temp[index];
-			if(*c == '&')
-			{
-				delimiter = '&';
-				break;
-			}
-			else if(*c == ';')
-			{
-				delimiter = ';';
-				break;
-			}			
-			index++;
-			length--;
+		char *c = (char *) &temp[index];
+		if (*c == '&') {
+			delimiter = '&';
+			break;
+		} else if (*c == ';') {
+			delimiter = ';';
+			break;
 		}
+		index++;
+		length--;
+	}
 	return Execute(buf, delimiter);
 }
 
-
+/*
+ * Function to get index of particular character in source string.
+ */
 int getIndex(char *str, char *delim)
 {
 	char *c;
@@ -357,6 +386,9 @@ int getIndex(char *str, char *delim)
 	return index;
 }
 
+/*
+ * Function to build command array.
+ */
 int parseToken(char *buf, COMMAND_ARRAY *cArray, int clear) {
 	int retval = 1;
 	int length = 0;
@@ -406,6 +438,9 @@ int parseToken(char *buf, COMMAND_ARRAY *cArray, int clear) {
 	return retval;
 }
 
+/*
+ * Function to check whether the entered expression is valid or not.
+ */
 int IsValidExpression(char *input){
 	int valid = 0;
 	int index = 0;
