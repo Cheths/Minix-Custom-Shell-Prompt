@@ -175,7 +175,6 @@ void handleBraceAndReturnString(int retval, char* finalString[1024], char* temp)
 	 * '()' has higher priority.
 	 */
 	retval = 0;
-	;
 	while (cArray[finalcount].level != -1) {
 		strcat(finalString, cArray[finalcount].input);
 		finalcount++;
