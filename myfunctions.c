@@ -217,7 +217,7 @@ int Execute(char *buf, char *delimiter) {
 		if (buf) {
 			char first_argument[64] = { 0 };
 
-			if (strchr(buf, '<') || strchr(buf, '>')) {
+			if (strchr(buf, '<') || strchr(buf, '>') || strchr(buf, '|')) {
 				printf("Command with < and > is not supported\n");
 				break;
 			}
@@ -249,32 +249,27 @@ int Execute(char *buf, char *delimiter) {
 						
 					}else {
 						if (delimiter != NULL) {
-							arg_list[counter] = strtok(NULL, '\0');
+							arg_list[counter] = strtok(NULL, "\0");
 						}
 					}
 				}
 
-				if( strcmp( first_argument, "cd .." ) == 0 )
-                {
+				if( strcmp( first_argument, "cd .." ) == 0 ) {
                     char cwd[255];
                     int iterator = 0;
 
                     arg_list[iterator] = strtok(first_argument, " ");
 					
-                    if( arg_list[0] != NULL )
-                    {
-                    	 while(arg_list[iterator]!=NULL)
-                    	{
+                    if( arg_list[0] != NULL ) {
+                    	 while(arg_list[iterator]!=NULL) {
                     		iterator++;
                         	arg_list[iterator]= strtok(NULL,"\n");
                         }
                         /* If command is cd -; go back to old directory if
                          * exists */
-                        if( strcmp(arg_list[1], "-") == 0 )
-                        {
+                        if( strcmp(arg_list[1], "-") == 0 ) {
                         	log_info("inside if ");
-                            if (valid_oldpwd) 
-                            {
+                            if (valid_oldpwd) {
                                 char cwd[255];
                                 getcwd(cwd, sizeof(cwd));
                                 chdir( oldpwd );
@@ -282,8 +277,7 @@ int Execute(char *buf, char *delimiter) {
                                 debug("Oldpwd %s.. ", oldpwd);
                             }
                         }
-                        else
-                        {
+                        else {
                             /* cache current directory value before changing the
                              * directory */
                             valid_oldpwd = 1;
@@ -332,9 +326,12 @@ int Execute(char *buf, char *delimiter) {
 							log_info("Error forking the process, PID: %d", pid);
 						} else if (pid == 0) {
 							execvp(arg_list[counter], arg_ind);
-							exit(0);
+							exit(errno);
 						} else {
 							waitpid(pid, &status, 0);
+							if(WIFEXITED(status) && WEXITSTATUS(status) != 0){
+								printf("Command not found in Custom shell.\n");
+							}
 						}
 						counter++;
 					}
@@ -354,18 +351,22 @@ int Execute(char *buf, char *delimiter) {
  * Function to pre-process input commands checking for delimiters.
  */
 int preProcessCommand(char *buf) {
-	char *delimiter;
+	char delim;
+	char *delimiter = &delim;
 	int length = 0;
 	int index = 0;
-	int *temp = buf;
+	char cmd;
+	char *temp = &cmd;
+	//strcpy(temp, buf);
+	//*temp = *buf;
 	length = strlen(buf);
 	while (length) {
-		char *c = (char *) &temp[index];
-		if (*c == '&') {
-			delimiter = '&';
+		//char *c = (char *) &temp[index];
+		if (buf[index] == '&') {
+			*delimiter = '&';
 			break;
-		} else if (*c == ';') {
-			delimiter = ';';
+		} else if (buf[index] == ';') {
+			*delimiter = ';';
 			break;
 		}
 		index++;
