@@ -1,3 +1,7 @@
+
+/**
+ * This file supports all the basic functions for Minix shell prompt.
+ */
 #include "common.h"
 
 bool startsWith(const char *pre, const char *str)
@@ -214,7 +218,18 @@ int Execute(char *buf, char *delimiter) {
 						handleBraceAndReturnString(retval, &stringBraces, prevCommand);
 						preProcessCommand(stringBraces);
 
-					} else {
+					} else if(strchr(prevCommand, '&')){
+						strtok(prevCommand, "&");
+						arg_list[counter] = strtok(NULL, "&");
+					}else if(strchr(prevCommand, ';')){
+						//int locIndex = counter - 1;
+						strtok(prevCommand, ";");
+						arg_list[counter] = strtok(NULL, ";");
+						/*char *temp = strtok(prevCommand, ";");
+						while(temp != NULL){
+							arg_list[locIndex] = temp;
+						}*/
+					}else {
 						if (delimiter != NULL) {
 							arg_list[counter] = strtok(NULL, "h");
 						}
@@ -235,6 +250,9 @@ int Execute(char *buf, char *delimiter) {
 					counter = 0;
 
 					while (arg_list[counter] != NULL) {
+						if(strchr(arg_list[counter],'&') || strchr(arg_list[counter],';')){
+							continue;
+						}
 						char *arg_ind[30] = { 0 };//reintialize to avoid previous option retained for current command.
 						debug("%s***",arg_list[counter]);
 						arg_ind[0] = arg_list[counter];
