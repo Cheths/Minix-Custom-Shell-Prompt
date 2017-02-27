@@ -2,4 +2,4 @@
 prompt=$
 path=/bin:/usr/bin
 home=/root/project1/
-alarmEnabled=true
+alarmEnabled=false

@@ -2,39 +2,15 @@
 
 #include "common.h"
 
-/*void handleBraceAndReturnString(int retval, char* finalString[1024], char* temp) {
-	int finalcount = 0;
-	char *token;
-	 Tokenize user input and parse it
-	token = strtok(temp, ",\n");
-	retval = parseToken(token, cArray, 1);
-	while (token != NULL) {
-		token = strtok(NULL, ",\n");
-		if (token != NULL)
-			retval = parseToken(token, cArray, 0);
-	}
-
-	 * execute the command based on their level, as rightmost input in
-	 * '()' has higher priority.
-
-	retval = 0;
-	;
-	while (cArray[finalcount].level != -1) {
-		strcat(finalString, cArray[finalcount].input);
-		finalcount++;
-	};
-	//return finalString;
-}*/
-
 int main(){
-	
+
 	signal(SIGALRM, alarm_Handler);
-	
+
 	char *home;
     char *promptsign;
 	char buf[SIZE];
 	int retval = 0;
-	
+
 	struct sigaction new_act,old_act;
 	do{
 		//log_info("Function:%s:  Entry", __FUNCTION__);
@@ -53,7 +29,7 @@ int main(){
 			log_info("retval[%d]",retval);
 			break;
 		}
-		
+
 		setjmp(sjbuf);
 		if (old_act.sa_handler != SIG_IGN)
         {
@@ -65,7 +41,7 @@ int main(){
                 break;
             }
         }
-		
+
 		initializeCommandArray(cArray);
 		chdir(home);
 		while(TRUE){
@@ -105,7 +81,7 @@ int main(){
 		}
 
 	}while(0);
-	
+
 	//log_info("Function:%s Exit", __FUNCTION__);
 	return 0;
 }

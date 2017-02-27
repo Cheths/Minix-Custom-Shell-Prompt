@@ -1,9 +1,5 @@
 #include "common.h"
 
-/*bool startsWith (char* base, char* str) {
-    return (strstr(base, str) - base) == 0;
-}*/
-
 bool startsWith(const char *pre, const char *str)
 {
     size_t lenpre = strlen(pre),
@@ -179,7 +175,6 @@ void handleBraceAndReturnString(int retval, char* finalString[1024], char* temp)
 		strcat(finalString, cArray[finalcount].input);
 		finalcount++;
 	};
-	//return finalString;
 }
 
 int Execute(char *buf, char *delimiter) {
@@ -201,32 +196,35 @@ int Execute(char *buf, char *delimiter) {
 				break;
 			}
 
-			arg_list[counter] = strtok(buf, delimiter);
+			if (delimiter == NULL) {
+				arg_list[counter] = buf;
+			} else {
+				arg_list[counter] = strtok(buf, delimiter);
+			}
 
 			if (arg_list[counter] != NULL) {
 				strcpy(first_argument, arg_list[0]);
 				while (arg_list[counter] != NULL) {
 					counter++;
-					char *prevCommand = arg_list[counter-1];
-					if(startsWith("(",prevCommand)){
-						arg_list[counter-1] = '\0';
+					char *prevCommand = arg_list[counter - 1];
+					if (startsWith("(", prevCommand)) {
+						arg_list[counter - 1] = '\0';
 						char stringBraces[1024];
-						memset(stringBraces,0,1024);
-						handleBraceAndReturnString(retval,&stringBraces,prevCommand);
+						memset(stringBraces, 0, 1024);
+						handleBraceAndReturnString(retval, &stringBraces,
+								prevCommand);
 						preProcessCommand(stringBraces);
 
+					} else {
+						if (delimiter != NULL) {
+							arg_list[counter] = strtok(NULL, delimiter);
+						}
 					}
-					else{
-						arg_list[counter] = strtok(NULL, delimiter);
-					}
-					//counter++;
-
-
-
 				}
 
 				//Handle exit and quit
-				if ((strcmp(first_argument, "exit") == 0) || (strcmp(first_argument, "quit") == 0)) {
+				if ((strcmp(first_argument, "exit") == 0)
+						|| (strcmp(first_argument, "quit") == 0)) {
 					log_info("Shell Exit: pid %d", getpid());
 					exit(0);
 				}
@@ -235,11 +233,10 @@ int Execute(char *buf, char *delimiter) {
 				if (arg_list[0] != NULL && isrun == 0) {
 					debug("first_argument %s", first_argument);
 					//pid = fork();
-					//char *arg_ind[30] = { 0 };
 					counter = 0;
 
 					while (arg_list[counter] != NULL) {
-						char *arg_ind[30] = { 0 };	//reintialize to avoid previous option retained for current command.
+						char *arg_ind[30] = { 0 };//reintialize to avoid previous option retained for current command.
 						debug("%s***",arg_list[counter]);
 						arg_ind[0] = arg_list[counter];
 						char *opt[30] = { 0 };
@@ -288,12 +285,6 @@ int Execute(char *buf, char *delimiter) {
 
 int preProcessCommand(char *buf) {
 	char *delimiter;
-
-	/*char *ampersandChar = strchr(buf, '&');
-	char *semicolonChar = strchr(buf, ';');*/
-
-	/*int ampersandCharLength = (int) (ampersandChar - buf);
-	int semicolonCharLength = (int) (semicolonChar - buf);*/
 
 	int ampersandCharLength = getIndex(buf,'&');
 	int semicolonCharLength = getIndex(buf,';');
@@ -369,9 +360,7 @@ int IsValidExpression(char *input){
 	int valid = 0;
 	int index = 0;
 	int paranthesisCounter = 0;
-	//char *arg_list[30] = {0};
 	int length = strlen(input);
-	//*arg_list = input;
 
 	while(length-1 > 0)
 	{
