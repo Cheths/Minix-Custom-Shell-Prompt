@@ -207,12 +207,23 @@ int Execute(char *buf, char *delimiter) {
 			if (arg_list[counter] != NULL) {
 				strcpy(first_argument, arg_list[0]);
 				while (arg_list[counter] != NULL) {
-					debug("%s***",arg_list[counter]);
 					counter++;
-					if(startsWith(&arg_list[counter],"(")){
-						printf("yay!");
+					char *prevCommand = arg_list[counter-1];
+					if(startsWith("(",prevCommand)){
+						arg_list[counter-1] = '\0';
+						char stringBraces[1024];
+						memset(stringBraces,0,1024);
+						handleBraceAndReturnString(retval,&stringBraces,prevCommand);
+						preProcessCommand(stringBraces);
+
 					}
-					arg_list[counter] = strtok(NULL, delimiter);
+					else{
+						arg_list[counter] = strtok(NULL, delimiter);
+					}
+					//counter++;
+
+
+
 				}
 
 				//Handle exit and quit
@@ -279,18 +290,30 @@ int Execute(char *buf, char *delimiter) {
 int preProcessCommand(char *buf) {
 	char *delimiter;
 
-	char *ampersandChar = strchr(buf, '&');
-	char *semicolonChar = strchr(buf, ';');
+	/*char *ampersandChar = strchr(buf, '&');
+	char *semicolonChar = strchr(buf, ';');*/
 
-	int ampersandCharLength = (int) (ampersandChar - buf);
-	int semicolonCharLength = (int) (semicolonChar - buf);
+	/*int ampersandCharLength = (int) (ampersandChar - buf);
+	int semicolonCharLength = (int) (semicolonChar - buf);*/
 
-	if (ampersandCharLength < semicolonCharLength) {
+	int ampersandCharLength = getIndex(buf,'&');
+	int semicolonCharLength = getIndex(buf,';');
+
+	if (ampersandCharLength > 0 && ampersandCharLength < semicolonCharLength) {
 		delimiter = "&";
-	} else {
+	} else if(semicolonCharLength > 0 && ampersandCharLength > semicolonCharLength){
 		delimiter = ";";
 	}
 	return Execute(buf, delimiter);
+}
+
+int getIndex(char *str, char *delim)
+{
+	char *c;
+	int index;
+	c = strchr(str,delim);
+	index = (int)(c-str);
+	return index;
 }
 
 int parseToken(char *buf, COMMAND_ARRAY *cArray, int clear) {
