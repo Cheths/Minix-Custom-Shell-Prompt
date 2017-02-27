@@ -211,13 +211,12 @@ int Execute(char *buf, char *delimiter) {
 						arg_list[counter - 1] = '\0';
 						char stringBraces[1024];
 						memset(stringBraces, 0, 1024);
-						handleBraceAndReturnString(retval, &stringBraces,
-								prevCommand);
+						handleBraceAndReturnString(retval, &stringBraces, prevCommand);
 						preProcessCommand(stringBraces);
 
 					} else {
 						if (delimiter != NULL) {
-							arg_list[counter] = strtok(NULL, delimiter);
+							arg_list[counter] = strtok(NULL, "h");
 						}
 					}
 				}
@@ -257,16 +256,14 @@ int Execute(char *buf, char *delimiter) {
 							return 1;
 							log_info("Error forking the process, PID: %d", pid);
 						} else if (pid == 0) {
-							log_info("Inside execv loop: PID: %d", pid);
+							//log_info("Inside execv loop: PID: %d", pid);
 							log_info("Arg is %s", arg_list[counter]);
-							log_info("counter-->%d", counter);
-							log_info("Before Child exit..");
+							//log_info("Before Child exit..");
 							execvp(arg_list[counter], arg_ind);
 							exit(0);
 						} else {
-							log_info("Inside waitpid loop: PID: %d", pid);
+							//log_info("Inside waitpid loop: PID: %d", pid);
 							log_info("Arg is %s", arg_list[counter]);
-							log_info("counter-->%d", counter);
 							waitpid(pid, &status, 0);
 						}
 						counter++;
@@ -289,9 +286,9 @@ int preProcessCommand(char *buf) {
 	int ampersandCharLength = getIndex(buf,'&');
 	int semicolonCharLength = getIndex(buf,';');
 
-	if (ampersandCharLength > 0 && ampersandCharLength < semicolonCharLength) {
+	if (ampersandCharLength > semicolonCharLength) {
 		delimiter = "&";
-	} else if(semicolonCharLength > 0 && ampersandCharLength > semicolonCharLength){
+	} else if(ampersandCharLength < semicolonCharLength){
 		delimiter = ";";
 	}
 	return Execute(buf, delimiter);
