@@ -236,8 +236,48 @@ int Execute(char *buf, char *delimiter) {
 					}
 				}
 
+				if( strcmp( first_argument, "cd .." ) == 0 )
+                {
+                    char cwd[255];
+                    int iterator = 0;
+
+                    arg_list[iterator] = strtok(first_argument, " ");
+					
+                    if( arg_list[0] != NULL )
+                    {
+                    	 while(arg_list[iterator]!=NULL)
+                    	{
+                    		iterator++;
+                        	arg_list[iterator]= strtok(NULL,"\n");
+                        }
+                        /* If command is cd -; go back to old directory if
+                         * exists */
+                        if( strcmp(arg_list[1], "-") == 0 )
+                        {
+                        	log_info("inside if ");
+                            if (valid_oldpwd) 
+                            {
+                                char cwd[255];
+                                getcwd(cwd, sizeof(cwd));
+                                chdir( oldpwd );
+                                stpncpy(oldpwd, cwd, sizeof(oldpwd));
+                                debug("Oldpwd %s.. ", oldpwd);
+                            }
+                        }
+                        else
+                        {
+                            /* cache current directory value before changing the
+                             * directory */
+                            valid_oldpwd = 1;
+                            stpncpy(oldpwd, getcwd(NULL, 0), sizeof(oldpwd));
+                            debug("Oldpwd %s.. %s", oldpwd, getcwd(NULL, 0));
+                            chdir( arg_list[1] );
+                        }
+                    }
+                    return retval;
+                }
 				//Handle exit and quit
-				if ((strcmp(first_argument, "exit") == 0)
+				else if ((strcmp(first_argument, "exit") == 0)
 						|| (strcmp(first_argument, "quit") == 0)) {
 					log_info("Shell Exit: pid %d", getpid());
 					exit(0);
