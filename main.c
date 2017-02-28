@@ -19,7 +19,7 @@ int main(){
 
 	struct sigaction newAction, oldAction;
 	do{
-		//log_info("Function:%s:  Entry", __FUNCTION__);
+		//log_info("Shell start PID:%d", getpid());
 
 		if(readProfile("prompt") == NULL){
 			promptsign = "$";

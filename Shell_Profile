@@ -2,4 +2,4 @@
 prompt=$
 path=/bin:/usr/bin
 home=/usr/src/Minix-Custom-Shell-Prompt/
-alarmEnabled=false
+alarmEnabled=true

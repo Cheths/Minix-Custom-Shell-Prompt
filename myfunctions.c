@@ -97,14 +97,34 @@ char* readProfile(char *type) {
 	char *home, *promptsign, *temp, *temp1, *position;
 	char command[20];
 	int length;
+	struct stat stat_var;
+	static char check[100] = "Shell_Profile";
 
 	do {
-		fp = fopen(PROFILE, "r");
-		if (fp == NULL) {
-			log_info("Cannot open PROFILE file");
-			return NULL;
-		}
+		if (stat(check, &stat_var) == -1){
+			printf("OOOOOps..");
+			printf("Profile file could not be opened. Creating a new profile file called profile_custom in /home\n");
+			fp = fopen("Shell_Profile", "wb+");
 
+			if (fp == NULL) {
+				printf("failed to open file /usr/src/Minix-Custom-Shell-Prompt/Shell_Profile\n");
+				return NULL;
+			} else {
+				fprintf(fp, "#profile file\n");
+				fprintf(fp, "prompt=$\n");
+				fprintf(fp, "path=/bin:/usr/bin\n");
+				fprintf(fp, "home=/usr/src/Minix-Custom-Shell-Prompt/\n");
+				fprintf(fp, "alarmEnabled=true");
+				fclose(fp);
+				log_info("Profile file  is custom loaded\n");
+			}
+		} else {
+			fp = fopen(PROFILE, "r");
+			if (fp == NULL) {
+				log_info("Cannot open PROFILE file");
+				return NULL;
+			}
+		}
 		while (fgets(command, sizeof(command), fp) != NULL) {
 			temp = strtok(command, "=");
 
@@ -236,10 +256,10 @@ int Execute(char *buf, char *delimiter) {
 						handleBraceAndReturnString(retval, &stringBraces, prevCommand);
 						preProcessCommand(stringBraces);
 
-					} else if(strchr(prevCommand, '&')){						
+					} else if(strchr(prevCommand, '&') && !startsWith("&",prevCommand)){
 						strtok(prevCommand, "&");
 						arg_list[counter] = strtok(NULL, "&");
-					}else if(strchr(prevCommand, ';')){
+					}else if(strchr(prevCommand, ';') && !startsWith(";",prevCommand)){
 						strtok(prevCommand, ";");						
 						arg_list[counter] = strtok(NULL, ";");
 						
@@ -305,6 +325,13 @@ int Execute(char *buf, char *delimiter) {
 						//Handle options
 						if (strchr(arg_ind[0], '-')) {
 							opt[optCounter] = strtok(arg_ind[0], " -");
+
+							while (arg_ind[optCounter] != NULL) {
+								arg_ind[optCounter + 1] = strtok(NULL, " ");
+								optCounter++;
+							}
+						} else if(strchr(arg_ind[0], ' ')){
+							opt[optCounter] = strtok(arg_ind[0], " ");
 
 							while (arg_ind[optCounter] != NULL) {
 								arg_ind[optCounter + 1] = strtok(NULL, " ");
@@ -390,12 +417,10 @@ int parseToken(char *buf, COMMAND_ARRAY *cmdArray, int clear) {
 		while (length) {
 			char *c = (char *) &buf[index];
 
-			/* raise our level if/when '(' is encountered in input */
 			if (*c == '(') {
 				++strLevel;
 			}
 
-			/* lower our level if/when '(' is encountered in input */
 			if (*c == ')') {
 				--strLevel;
 			}
