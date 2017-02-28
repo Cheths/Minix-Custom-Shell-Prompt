@@ -1,5 +1,5 @@
 #profile file
 prompt=$
 path=/bin:/usr/bin
-home=/root/project1/
+home=/usr/src/Minix-Custom-Shell-Prompt/
 alarmEnabled=false
