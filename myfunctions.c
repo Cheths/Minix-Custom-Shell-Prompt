@@ -222,7 +222,7 @@ int Execute(char *buf, char *delimiter) {
 				break;
 			}
 
-			if (delimiter == NULL) {
+			if (*delimiter == '0') {
 				arg_list[counter] = buf;
 			} else {
 				arg_list[counter] = strtok(buf, delimiter);
@@ -248,7 +248,7 @@ int Execute(char *buf, char *delimiter) {
 						arg_list[counter] = strtok(NULL, ";");
 						
 					}else {
-						if (delimiter != NULL) {
+						if (*delimiter != '0') {
 							arg_list[counter] = strtok(NULL, "\0");
 						}
 					}
@@ -351,7 +351,7 @@ int Execute(char *buf, char *delimiter) {
  * Function to pre-process input commands checking for delimiters.
  */
 int preProcessCommand(char *buf) {
-	char delim;
+	char delim = '0';
 	char *delimiter = &delim;
 	int length = 0;
 	int index = 0;

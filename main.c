@@ -70,18 +70,17 @@ int main(){
                 if(IsValidExpression(temp) == 0){
                 	printf("Invalid Input - Paranthesis is not proper\n");
 
-                }
-                else{
+                } else {
 
-				if(buf[0] == '('){
-					handleBraceAndReturnString(retval, &finalString, temp);
-					debug("Final string %s", finalString) debug("Final string %s", finalString) /* Execute command */
-                    preProcessCommand(finalString);
-				} else {
-					normal = strtok(normal,"\n");
-					retval = preProcessCommand(normal);
+					if (buf[0] == '(') {
+						handleBraceAndReturnString(retval, &finalString, temp);
+						debug("Final string %s", finalString) debug("Final string %s", finalString) /* Execute command */
+						preProcessCommand(finalString);
+					} else {
+						normal = strtok(normal, "\n");
+						retval = preProcessCommand(normal);
+					}
 				}
-                }
 			}
 
 		}
