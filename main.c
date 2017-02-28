@@ -59,18 +59,17 @@ int main(){
 			if(!fgets(buf,100,stdin)){
 				return 0;
 			}
-			if(buf != NULL){
+			if(buf != NULL && (strlen(buf) > 1 || !strchr(buf, '\n'))){ // if command is not just enter key and is not null
 				char *temp =buf;
+				char finalString[1024];
+				char *normal;
+				normal = buf;
+				memset(finalString,0,1024);
 
-                char finalString[1024];
-                char *normal;
-                normal = buf;
-                memset(finalString,0,1024);
+				if(IsValidExpression(temp) == 0){
+					printf("Invalid Input - Paranthesis is not proper\n");
 
-                if(IsValidExpression(temp) == 0){
-                	printf("Invalid Input - Paranthesis is not proper\n");
-
-                } else {
+				} else {
 
 					if (buf[0] == '(') {
 						handleBraceAndReturnString(retval, &finalString, temp);
@@ -82,7 +81,6 @@ int main(){
 					}
 				}
 			}
-
 		}
 
 	}while(0);
