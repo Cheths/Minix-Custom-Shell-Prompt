@@ -17,7 +17,7 @@ int main(){
 	char buf[SIZE];
 	int retval = 0;
 
-	struct sigaction new_act,old_act;
+	struct sigaction newAction, oldAction;
 	do{
 		//log_info("Function:%s:  Entry", __FUNCTION__);
 
@@ -29,26 +29,22 @@ int main(){
 			home = readProfile("home");
 		}
 
-		new_act.sa_handler = SIG_IGN;
-		retval = sigaction(SIGINT, &new_act, &old_act);
+		newAction.sa_handler = SIG_IGN;
+		retval = sigaction(SIGINT, &newAction, &oldAction);
 		if(retval < 0){
-			log_info("retval[%d]",retval);
 			break;
 		}
 
-		setjmp(sjbuf);
-		if (old_act.sa_handler != SIG_IGN)
-        {
-            new_act.sa_handler = signalhandler;
-            retval=sigaction(SIGINT, &new_act, &old_act);
-            if(retval<0)
-            {
-                log_info("retval[%d]",retval);
+		setjmp(jmpBuf);
+		if (oldAction.sa_handler != SIG_IGN) {
+            newAction.sa_handler = signalhandler;
+            retval = sigaction(SIGINT, &newAction, &oldAction);
+            if(retval < 0) {
                 break;
             }
         }
 
-		initializeCommandArray(cArray);
+		initializeCommandArray(cmdArray);
 		chdir(home);
 		while(TRUE){
 			char cwd[255];
@@ -66,14 +62,11 @@ int main(){
 				normal = buf;
 				memset(finalString,0,1024);
 
-				if(IsValidExpression(temp) == 0){
+				if(isValidExpression(temp) == 0){
 					printf("Invalid Input - Paranthesis is not proper\n");
-
 				} else {
-
 					if (buf[0] == '(') {
 						handleBraceAndReturnString(retval, &finalString, temp);
-						debug("Final string %s", finalString) debug("Final string %s", finalString) /* Execute command */
 						preProcessCommand(finalString);
 					} else {
 						normal = strtok(normal, "\n");

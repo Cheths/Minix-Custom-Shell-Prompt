@@ -7,26 +7,23 @@
 /*
  * Function to check whether source string starts with a particular character.
  */
-bool startsWith(const char *pre, const char *str)
+bool startsWith(const char *prefixString, const char *srcString)
 {
-    size_t lenpre = strlen(pre),
-           lenstr = strlen(str);
-    return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+    size_t lenpre = strlen(prefixString), lenstr = strlen(srcString);
+    return lenstr < lenpre ? false : strncmp(prefixString, srcString, lenpre) == 0;
 }
 
 /*
  * Function to handle 'Ctrl+C' keystroke.
  */
-void ctrlC_Handler() {
+void ctrl_C_Handler() {
 	char choice;
-	printf("\nDo you want to exit? Enter y/n \n");
+	printf("\nDo you want to exit? Enter Y/n \n");
 	scanf("%c", &choice);
 	log_info("Cmd entered:%c", choice);
-	{
-		if (choice == 'Y' || choice == 'y') {
-			log_info("successful exit");
-			exit(0);
-		}
+	if (choice == 'Y' || choice == 'y') {
+		log_info("successful exit");
+		exit(0);
 	}
 }
 
@@ -35,40 +32,38 @@ void ctrlC_Handler() {
  */
 void alarm_Handler() {
 	char choice;
-	printf("\nDo you want to exit? Enter y/n \n");
+	printf("\nDo you want to exit? Enter Y/n \n");
 	scanf("%c", &choice);
 	log_info("Cmd entered:%c", choice);
-	{
-		if (choice == 'Y' || choice == 'y') {
-			log_info("successful exit");
-			exit(0);
-		} else {
-			longjmp(sjbuf, 1);
-		}
+	if (choice == 'Y' || choice == 'y') {
+		log_info("successful exit");
+		exit(0);
+	} else {
+		longjmp(jmpBuf, 1);
 	}
 }
 
 /*
  * Function to handle signal interrupts.
  */
-void signalhandler(int signo) {
-	switch (signo) {
-	case SIGINT: {
-		char str;
-		printf("\nAre you sure?[Y/N]");
-		str = getchar();
-		if (str == 'y' || str == 'Y')
-			exit(0);
-		else
-			longjmp(sjbuf, 1);
-		break;
-	}
-	case SIGCHLD: {
-		int pid;
-		pid = wait(NULL);
-		printf("PID:%d completed job.\n", pid);
-		longjmp(sjbuf, 1);
-	}
+void signalhandler(int signalCode) {
+	switch (signalCode) {
+		case SIGINT: {
+			char str;
+			printf("\nAre you sure?[Y/n]");
+			str = getchar();
+			if (str == 'y' || str == 'Y')
+				exit(0);
+			else
+				longjmp(jmpBuf, 1);
+			break;
+		}
+		case SIGCHLD: {
+			int pid;
+			pid = wait(NULL);
+			printf("PID:%d completed job.\n", pid);
+			longjmp(jmpBuf, 1);
+		}
 	}
 }
 
@@ -76,21 +71,21 @@ void signalhandler(int signo) {
  * Function to get a clone of the input command.
  */
 char* duplicate(char *command) {
-	int len;
-	char *hs;
+	int length;
+	char *dupString;
 	if (command == NULL) {
 		return NULL;
 	}
 
-	len = strlen(command) + 1; //+1 for the null character
-	hs = (char *) malloc(len * sizeof(char));
+	length = strlen(command) + 1; //+1 for the null character
+	dupString = (char *) malloc(length * sizeof(char));
 
-	if (hs == NULL) {
+	if (dupString == NULL) {
 		log_info("Malloc failed");
 		return NULL;
 	} else {
-		strcpy(hs, command);
-		return hs;
+		strcpy(dupString, command);
+		return dupString;
 	}
 }
 
@@ -99,9 +94,9 @@ char* duplicate(char *command) {
  */
 char* readProfile(char *type) {
 	FILE *fp;
-	char *home, *promptsign, *temp, *temp1, *pos;
+	char *home, *promptsign, *temp, *temp1, *position;
 	char command[20];
-	int len;
+	int length;
 
 	do {
 		fp = fopen(PROFILE, "r");
@@ -123,14 +118,14 @@ char* readProfile(char *type) {
 				if (!promptsign) {
 					return NULL;
 				}
-				len = strlen(promptsign);
-				pos = promptsign + len - 1;
-				*pos = '\0';
+				length = strlen(promptsign);
+				position = promptsign + length - 1;
+				*position = '\0';
 			} else if (!strcmp(temp, "path")) {
 				char *path;
 				temp1 = strtok(NULL, "=");
-				pos = temp1 + strlen(temp1) - 1;
-				*pos = '\0';
+				position = temp1 + strlen(temp1) - 1;
+				*position = '\0';
 				setenv("PATH", temp1, 1);
 			} else if (!strcmp(temp, "home")) {
 				temp1 = strtok(NULL, "=");
@@ -138,9 +133,9 @@ char* readProfile(char *type) {
 				if (!home) {
 					return NULL;
 				}
-				len = strlen(home);
-				pos = home + len - 1;
-				*pos = '\0';
+				length = strlen(home);
+				position = home + length - 1;
+				*position = '\0';
 			} else if (!strcmp(temp, "alarmEnabled")) {
 				temp1 = strtok(NULL, "=");
 				if (!strcmp(temp1, "true")) {
@@ -165,16 +160,16 @@ char* readProfile(char *type) {
 /*
  * Function to initialize command array.
  */
-void initializeCommandArray(COMMAND_ARRAY *cArray) {
+void initializeCommandArray(COMMAND_ARRAY *cmdArray) {
 	int i = 0;
 
-	if (cArray == NULL) {
+	if (cmdArray == NULL) {
 		return;
 	}
 
-	for (i = 0; i < CARRAY_SIZE; i++) {
-		memset(&cArray[i].input, 0, sizeof(SIZE));
-		cArray[i].level = -1;
+	for (i = 0; i < ARR_SIZE; i++) {
+		memset(&cmdArray[i].input, 0, sizeof(SIZE));
+		cmdArray[i].level = -1;
 	}
 }
 
@@ -184,18 +179,19 @@ void initializeCommandArray(COMMAND_ARRAY *cArray) {
 void handleBraceAndReturnString(int retval, char* finalString[1024], char* temp) {
 	int finalcount = 0;
 	char *token;
-	/* Tokenize user input and parse it */
+
 	token = strtok(temp, ",\n");
-	retval = parseToken(token, cArray, 1);
+	retval = parseToken(token, cmdArray, 1);
+
 	while (token != NULL) {
 		token = strtok(NULL, ",\n");
 		if (token != NULL)
-			retval = parseToken(token, cArray, 0);
+			retval = parseToken(token, cmdArray, 0);
 	}
 	
 	retval = 0;
-	while (cArray[finalcount].level != -1) {
-		strcat(finalString, cArray[finalcount].input);
+	while (cmdArray[finalcount].level != -1) {
+		strcat(finalString, cmdArray[finalcount].input);
 		finalcount++;
 	};
 }
@@ -274,7 +270,6 @@ int Execute(char *buf, char *delimiter) {
                                 getcwd(cwd, sizeof(cwd));
                                 chdir( oldpwd );
                                 stpncpy(oldpwd, cwd, sizeof(oldpwd));
-                                debug("Oldpwd %s.. ", oldpwd);
                             }
                         }
                         else {
@@ -282,7 +277,6 @@ int Execute(char *buf, char *delimiter) {
                              * directory */
                             valid_oldpwd = 1;
                             stpncpy(oldpwd, getcwd(NULL, 0), sizeof(oldpwd));
-                            debug("Oldpwd %s.. %s", oldpwd, getcwd(NULL, 0));
                             chdir( arg_list[1] );
                         }
                     }
@@ -297,7 +291,6 @@ int Execute(char *buf, char *delimiter) {
 
 				// Handle normal command
 				if (arg_list[0] != NULL && isrun == 0) {
-					//pid = fork();
 					counter = 0;
 
 					while (arg_list[counter] != NULL) {
@@ -305,7 +298,6 @@ int Execute(char *buf, char *delimiter) {
 							continue;
 						}
 						char *arg_ind[30] = { 0 };//reinitialize to avoid previous option retained for current command.
-						debug("%s***",arg_list[counter]);
 						arg_ind[0] = arg_list[counter];
 						char *opt[30] = { 0 };
 						int optCounter = 0;
@@ -357,11 +349,9 @@ int preProcessCommand(char *buf) {
 	int index = 0;
 	char cmd;
 	char *temp = &cmd;
-	//strcpy(temp, buf);
-	//*temp = *buf;
 	length = strlen(buf);
+
 	while (length) {
-		//char *c = (char *) &temp[index];
 		if (buf[index] == '&') {
 			*delimiter = '&';
 			break;
@@ -376,29 +366,17 @@ int preProcessCommand(char *buf) {
 }
 
 /*
- * Function to get index of particular character in source string.
- */
-int getIndex(char *str, char *delim)
-{
-	char *c;
-	int index;
-	c = strchr(str,delim);
-	index = (int)(c-str);
-	return index;
-}
-
-/*
  * Function to build command array.
  */
-int parseToken(char *buf, COMMAND_ARRAY *cArray, int clear) {
+int parseToken(char *buf, COMMAND_ARRAY *cmdArray, int clear) {
 	int retval = 1;
 	int length = 0;
 	int index = 0, count = 0;
-	static int slevel = 0;
+	static int strLevel = 0;
 	static int array_count;
 
 	if (clear) {
-		slevel = 0;
+		strLevel = 0;
 		array_count = 0;
 	}
 
@@ -414,58 +392,51 @@ int parseToken(char *buf, COMMAND_ARRAY *cArray, int clear) {
 
 			/* raise our level if/when '(' is encountered in input */
 			if (*c == '(') {
-				++slevel;
+				++strLevel;
 			}
 
 			/* lower our level if/when '(' is encountered in input */
 			if (*c == ')') {
-				--slevel;
+				--strLevel;
 			}
 
-			if (isalpha(buf[index]) || isspace(buf[index]) || (*c == '-')
-					|| (*c == ';') || (*c == '&')) {
-				cArray[array_count].level = slevel;
-				cArray[array_count].input[count] = buf[index];
+			if (isalpha(buf[index]) || isspace(buf[index]) || (*c == '-') || (*c == ';') || (*c == '&')) {
+				cmdArray[array_count].level = strLevel;
+				cmdArray[array_count].input[count] = buf[index];
 				count++;
 			}
 			index++;
 			length--;
 		}
-		cArray[array_count].input[count] = '\0';
+		cmdArray[array_count].input[count] = '\0';
 		array_count++;
 	} while (0);
 
-	debug("EXIT");
 	return retval;
 }
 
 /*
  * Function to check whether the entered expression is valid or not.
  */
-int IsValidExpression(char *input){
-	int valid = 0;
+int isValidExpression(char *inputExpression){
+	int isValid = 0;
 	int index = 0;
-	int paranthesisCounter = 0;
-	int length = strlen(input);
+	int paranthesisCount = 0;
+	int length = strlen(inputExpression);
 
-	while(length-1 > 0)
-	{
-		char *c = (char *)&input[index];
-		if(*c == '(')
-		{
-			paranthesisCounter++;
-		}
-		else if(*c == ')')
-		{
-			paranthesisCounter--;
+	while(length-1 > 0) {
+		char *c = (char *)&inputExpression[index];
+		if(*c == '(') {
+			paranthesisCount++;
+		} else if(*c == ')') {
+			paranthesisCount--;
 		}
 		index++;
 		length--;
 	}
-	if(paranthesisCounter == 0)
-	{
-		valid = 1;
+	if(paranthesisCount == 0) {
+		isValid = 1;
 	}
-	return valid;
+	return isValid;
 }
 
